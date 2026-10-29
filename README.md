@@ -33,8 +33,19 @@ Vite `/api/*` so'rovlarini 5000-portga proksi qiladi, shuning uchun CORS sozlash
 | `npm run dev:server` | Faqat mock API (watch rejimida)                                    |
 | `npm run dev:client` | Faqat frontend                                                     |
 | `npm run build`      | Type-check + production build (`dist/`)                            |
-| `npm start`          | Build qilib, frontend + API'ni bitta serverda (5000-port) ishlatish |
+| `npm start`          | Production: build qilingan frontend + API bitta serverda (`npm run build` dan keyin) |
 | `npm run typecheck`  | Faqat TypeScript tekshiruvi                                        |
+
+## Heroku'ga deploy
+
+Loyiha Heroku'ga tayyor: `Procfile` (`web: node server/index.js`), Node buildpack `npm run build` ni avtomatik
+bajaradi, Express esa `dist/` va `/api/*` ni Heroku bergan `PORT` da tarqatadi.
+
+```bash
+heroku create <app-nomi>
+git push heroku main
+heroku open
+```
 
 ## Mock API
 
@@ -61,7 +72,7 @@ Xatolik formati: `{ "error": { "code": "INVALID_RANGE", "message": "..." } }` (4
 
 | Muhit o'zgaruvchisi | Default | Tavsif                              |
 | ------------------- | ------- | ----------------------------------- |
-| `API_PORT`          | `5000`  | API porti                           |
+| `API_PORT` / `PORT` | `5000`  | API porti (`PORT` — Heroku uchun)  |
 | `API_DELAY_MS`      | `800`   | Bazaviy kechikish                   |
 | `API_FAILURE_RATE`  | `0`     | Tasodifiy xatolik ehtimoli (0..1)   |
 | `VITE_API_URL`      | `''`    | Frontend uchun API bazaviy manzili  |

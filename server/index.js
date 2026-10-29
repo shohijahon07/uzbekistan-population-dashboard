@@ -5,7 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { populationSeries, MIN_YEAR, MAX_YEAR } from './data.js';
 
-const PORT = Number(process.env.API_PORT) || 5000;
+// API_PORT — lokal dev uchun; PORT — Heroku kabi platformalar beradigan port.
+const PORT = Number(process.env.API_PORT || process.env.PORT) || 5000;
 /** Tarmoq kechikishi emulyatsiyasi (ms). ?delay=... bilan so'rov darajasida o'zgartiriladi. */
 const DEFAULT_DELAY_MS = Number(process.env.API_DELAY_MS ?? 800);
 /** Tasodifiy xatolik ehtimoli (0..1). Masalan: API_FAILURE_RATE=0.2 */
