@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-50 font-sans antialiased dark:bg-slate-950;
+}
+
+/* Recharts fokus konturini olib tashlash */
+.recharts-wrapper *:focus {
+  outline: none;
+}
