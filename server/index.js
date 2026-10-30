@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { populationSeries, MIN_YEAR, MAX_YEAR } from './data.js';
@@ -77,8 +78,44 @@ app.use('/api', (_req, res) => sendError(res, 404, 'NOT_FOUND', 'Endpoint topilm
 // Production: build qilingan frontendni ham shu server orqali tarqatamiz (npm start).
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 if (existsSync(distDir)) {
-  app.use(express.static(distDir));
-  app.get('*', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
+  // Vite fayl nomlariga hash qo'shadi (index-aqCVBjrD.js): mazmun o'zgarsa nom ham o'zgaradi,
+  // shuning uchun /assets/* ni brauzer 1 yil keshlaydi. index.html esa har safar tekshiriladi.
+  const IMMUTABLE = 'public, max-age=31536000, immutable';
+  const GZIP_TYPES = {
+    '.js': 'application/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.svg': 'image/svg+xml',
+    '.json': 'application/json; charset=utf-8',
+  };
+  const gzipCache = new Map();
+
+  // Matnli fayllarni bir marta gzip qilib, xotirada saqlaymiz (561 KB JS → ~170 KB)
+  app.get('/assets/*', (req, res, next) => {
+    const type = GZIP_TYPES[path.extname(req.path)];
+    if (!type || !req.acceptsEncodings('gzip')) return next();
+    const file = path.join(distDir, req.path);
+    if (!file.startsWith(distDir + path.sep) || !existsSync(file)) return next();
+    let gz = gzipCache.get(file);
+    if (!gz) {
+      gz = gzipSync(readFileSync(file), { level: 9 });
+      gzipCache.set(file, gz);
+    }
+    res.set({ 'Content-Type': type, 'Content-Encoding': 'gzip', Vary: 'Accept-Encoding', 'Cache-Control': IMMUTABLE });
+    res.send(gz);
+  });
+
+  app.use(
+    express.static(distDir, {
+      setHeaders: (res, filePath) => {
+        const isAsset = filePath.includes(`${path.sep}assets${path.sep}`);
+        res.setHeader('Cache-Control', isAsset ? IMMUTABLE : 'no-cache');
+      },
+    }),
+  );
+  app.get('*', (_req, res) => {
+    res.set('Cache-Control', 'no-cache');
+    res.sendFile(path.join(distDir, 'index.html'));
+  });
 }
 
 // eslint-disable-next-line no-unused-vars
