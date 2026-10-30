@@ -1,5 +1,8 @@
 # Uzbekistan Population Dynamics (1991–2026)
 
+[![Live demo](https://img.shields.io/badge/Live_demo-Heroku-6762A6?style=for-the-badge&logo=heroku&logoColor=white)](https://uzbekistan-population-dash-92369a4e0439.herokuapp.com/)
+
+
 O'zbekiston aholisi dinamikasini ko'rsatuvchi dashboard: KPI kartalar, interaktiv grafik (Line/Bar),
 davr filtri, A4 PDF va CSV eksport, Dark/Light rejim, 3 tilli interfeys (O'zbekcha / English / Русский).
 
